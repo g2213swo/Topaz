@@ -13,16 +13,6 @@ kotlin {
     jvmToolchain(11)
 }
 
-tasks.clean {
-    delete("$rootDir/target")
-}
-
-tasks.build {
-    doLast {
-
-    }
-}
-
 allprojects {
 
     apply<JavaPlugin>()
