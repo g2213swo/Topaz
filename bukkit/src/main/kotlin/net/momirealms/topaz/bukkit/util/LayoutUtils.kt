@@ -1,4 +1,4 @@
-package net.momirealms.topaz.bukkit
+package net.momirealms.topaz.bukkit.util
 
 import net.momirealms.topaz.bukkit.inv.InventoryType
 

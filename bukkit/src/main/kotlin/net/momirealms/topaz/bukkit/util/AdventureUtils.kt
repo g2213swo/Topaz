@@ -1,7 +1,8 @@
-package net.momirealms.topaz.bukkit
+package net.momirealms.topaz.bukkit.util
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
+import net.momirealms.topaz.bukkit.BukkitPluginImpl
 import org.bukkit.command.CommandSender
 import org.bukkit.command.ConsoleCommandSender
 import org.bukkit.entity.Player
