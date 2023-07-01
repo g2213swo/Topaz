@@ -242,39 +242,39 @@ public class TopazUI implements Listener {
     /**
      * 直接设置特定槽位的物品
      * @param slot      要添加的槽位
-     * @param element   要添加的{@link GuiItem}
+     * @param item   要添加的{@link GuiItem}
      * @throws IllegalArgumentException 如果提供的槽位小于0或等于/超过可用槽位数量，则抛出异常
      * @throws IllegalStateException 如果物品已经添加到GUI中，则抛出异常
      */
-    public void setItem(int slot, GuiItem element) {
+    public void setItem(int slot, GuiItem item) {
         if (slot < 0 || slot >= itemSlots.length) {
-            // throw new IllegalArgumentException("Provided slots is outside available slots! (" + elementSlots.length + ")");
+            // throw new IllegalArgumentException("Provided slots is outside available slots! (" + itemSlots.length + ")");
             throw new IllegalArgumentException("提供的槽位超出可用槽位范围！（" + itemSlots.length + "）");
         }
-        if (element.getSlots().length > 0 || element.getGui() != null) {
+        if (item.getSlots().length > 0 || item.getGui() != null) {
             //throw new IllegalStateException("Item was already added to a gui!");
             throw new IllegalStateException("物品已经添加到GUI中！");
         }
-        element.setSlots(new int[] {slot});
-        element.setGui(this);
-        itemSlots[slot] = element;
+        item.setSlots(new int[] {slot});
+        item.setGui(this);
+        itemSlots[slot] = item;
     }
 
     /**
      * 使用物品的槽位字符和GUI设置字符串直接将物品添加到GUI中
-     * @param element   要添加的{@link GuiItem}
+     * @param item   要添加的{@link GuiItem}
      */
-    public void addItem(GuiItem element) {
-        if (element.getSlots().length > 0 || element.getGui() != null) {
+    public void addItem(GuiItem item) {
+        if (item.getSlots().length > 0 || item.getGui() != null) {
             //throw new IllegalStateException("Item was already added to a gui!");
             throw new IllegalStateException("物品已经添加到GUI中！");
         }
-        items.put(element.getSlotChar(), element);
-        element.setGui(this);
-        int[] slots = getSlots(element.getSlotChar());
-        element.setSlots(slots);
+        items.put(item.getSlotChar(), item);
+        item.setGui(this);
+        int[] slots = getSlots(item.getSlotChar());
+        item.setSlots(slots);
         for (int slot : slots) {
-            itemSlots[slot] = element;
+            itemSlots[slot] = item;
         }
     }
 
@@ -363,34 +363,34 @@ public class TopazUI implements Listener {
 
     /**
      * 使用其槽字符位置将多个物品添加到GUI中。
-     * @param elements   要添加的{@link GuiItem}物品
+     * @param items   要添加的{@link GuiItem}物品
      */
-    public void addItems(GuiItem... elements) {
-        for (GuiItem element : elements) {
-            addItem(element);
+    public void addItems(GuiItem... items) {
+        for (GuiItem item : items) {
+            addItem(item);
         }
     }
 
     /**
      * 使用其槽字符位置将多个物品添加到GUI中。
-     * @param elements   要添加的{@link GuiItem}物品
+     * @param items   要添加的{@link GuiItem}物品
      */
-    public void addItems(Collection<GuiItem> elements) {
-        for (GuiItem element : elements) {
-            addItem(element);
+    public void addItems(Collection<GuiItem> items) {
+        for (GuiItem item : items) {
+            addItem(item);
         }
     }
 
 
     /**
      * 从GUI中移除特定物品。
-     * @param element   要移除的物品
+     * @param item   要移除的物品
      * @return GUI是否包含此物品，并且是否已被移除
      */
-    public boolean removeItem(GuiItem element) {
-        boolean removed = items.remove(element.getSlotChar(), element);
-        for (int slot : element.getSlots()) {
-            if (itemSlots[slot] == element) {
+    public boolean removeItem(GuiItem item) {
+        boolean removed = items.remove(item.getSlotChar(), item);
+        for (int slot : item.getSlots()) {
+            if (itemSlots[slot] == item) {
                 itemSlots[slot] = null;
                 removed = true;
             }
@@ -405,11 +405,11 @@ public class TopazUI implements Listener {
      * @return 该槽位中的物品，如果没有则返回<code>null</code>
      */
     public GuiItem removeItem(char slotChar) {
-        GuiItem element = getItem(slotChar);
-        if (element != null) {
-            removeItem(element);
+        GuiItem item = getItem(slotChar);
+        if (item != null) {
+            removeItem(item);
         }
-        return element;
+        return item;
     }
 
     /**
@@ -421,9 +421,9 @@ public class TopazUI implements Listener {
         if (slot < 0 || slot >= itemSlots.length) {
             return null;
         }
-        GuiItem element = itemSlots[slot];
+        GuiItem item = itemSlots[slot];
         itemSlots[slot] = null;
-        return element;
+        return item;
     }
 
     /**
@@ -500,10 +500,10 @@ public class TopazUI implements Listener {
 
     private void calculatePageAmount(HumanEntity player) {
         int pageAmount = 0;
-        for (GuiItem element : items.values()) {
-            int amount = calculateItemSize(player, element);
-            if (amount > 0 && (pageAmount - 1) * element.getSlots().length < amount && element.getSlots().length > 0) {
-                pageAmount = (int) Math.ceil((double) amount / element.getSlots().length);
+        for (GuiItem item : items.values()) {
+            int amount = calculateItemSize(player, item);
+            if (amount > 0 && (pageAmount - 1) * item.getSlots().length < amount && item.getSlots().length > 0) {
+                pageAmount = (int) Math.ceil((double) amount / item.getSlots().length);
             }
         }
         setPageAmount(player, pageAmount);
@@ -512,13 +512,13 @@ public class TopazUI implements Listener {
         }
     }
 
-    private int calculateItemSize(HumanEntity player, GuiItem element) {
-        if (element instanceof GuiItemGroup) {
-            return ((GuiItemGroup) element).size();
-        } else if (element instanceof GuiStorageItem) {
-            return ((GuiStorageItem) element).getStorage().getSize();
-        } else if (element instanceof DynamicGuiItem) {
-            return calculateItemSize(player, ((DynamicGuiItem) element).getCachedItem(player));
+    private int calculateItemSize(HumanEntity player, GuiItem item) {
+        if (item instanceof GuiItemGroup) {
+            return ((GuiItemGroup) item).size();
+        } else if (item instanceof GuiStorageItem) {
+            return ((GuiStorageItem) item).getStorage().getSize();
+        } else if (item instanceof DynamicGuiItem) {
+            return calculateItemSize(player, ((DynamicGuiItem) item).getCachedItem(player));
         }
         return 0;
     }
@@ -636,12 +636,12 @@ public class TopazUI implements Listener {
             inventory.clear();
         }
         for (int i = 0; i < inventory.getSize(); i++) {
-            GuiItem element = getItem(i);
-            if (element == null) {
-                element = getFiller();
+            GuiItem item = getItem(i);
+            if (item == null) {
+                item = getFiller();
             }
-            if (element != null) {
-                inventory.setItem(i, element.getItem(who, i));
+            if (item != null) {
+                inventory.setItem(i, item.getItem(who, i));
             }
         }
     }
@@ -696,14 +696,14 @@ public class TopazUI implements Listener {
     /**
      * 更新物品集合中的所有动态物品。
      * @param who       要更新物品的玩家
-     * @param elements  要更新的物品集合
+     * @param items  要更新的物品集合
      */
-    public static void updateItems(HumanEntity who, Collection<GuiItem> elements) {
-        for (GuiItem element : elements) {
-            if (element instanceof DynamicGuiItem) {
-                ((DynamicGuiItem) element).update(who);
-            } else if (element instanceof GuiItemGroup) {
-                updateItems(who, ((GuiItemGroup) element).getItems());
+    public static void updateItems(HumanEntity who, Collection<GuiItem> items) {
+        for (GuiItem item : items) {
+            if (item instanceof DynamicGuiItem) {
+                ((DynamicGuiItem) item).update(who);
+            } else if (item instanceof GuiItemGroup) {
+                updateItems(who, ((GuiItemGroup) item).getItems());
             }
         }
     }
@@ -1088,11 +1088,11 @@ public class TopazUI implements Listener {
      */
     private GuiItem.Click handleInteract(InventoryInteractEvent event, ClickType clickType, int slot, ItemStack cursor) {
         GuiItem.Action action = null;
-        GuiItem element = null;
+        GuiItem item = null;
         if (slot >= 0) {
-            element = getItem(slot);
-            if (element != null) {
-                action = element.getAction(event.getWhoClicked());
+            item = getItem(slot);
+            if (item != null) {
+                action = item.getAction(event.getWhoClicked());
             }
         } else if (slot == -999) {
             action = outsideAction;
@@ -1112,7 +1112,7 @@ public class TopazUI implements Listener {
             return null;
         }
         try {
-            GuiItem.Click click = new GuiItem.Click(this, slot, clickType, cursor, element, event);
+            GuiItem.Click click = new GuiItem.Click(this, slot, clickType, cursor, item, event);
             if (action == null || action.onClick(click)) {
                 event.setCancelled(true);
                 if (event.getWhoClicked() instanceof Player) {
@@ -1137,10 +1137,10 @@ public class TopazUI implements Listener {
                 ((Player) event.getWhoClicked()).updateInventory();
             }
 //            plugin.getLogger().log(Level.SEVERE, "Exception while trying to run action for click on "
-//                    + (element != null ? element.getClass().getSimpleName() : "empty element")
+//                    + (item != null ? item.getClass().getSimpleName() : "empty item")
 //                    + " in slot " + slot + " of " + getTitle() + " GUI!");
             plugin.getLogger().log(Level.SEVERE, "尝试运行在 "
-                    + (element != null ? element.getClass().getSimpleName() : "空物品")
+                    + (item != null ? item.getClass().getSimpleName() : "空物品")
                     + " 中的插槽 " + slot + " 的 " + getTitle() + " GUI 上的点击动作时发生异常！");
             t.printStackTrace();
         }
@@ -1262,9 +1262,9 @@ public class TopazUI implements Listener {
                 Map<Integer, ItemStack> resetSlots = new HashMap<>();
                 for (Map.Entry<Integer, ItemStack> items : event.getNewItems().entrySet()) {
                     if (items.getKey() < inventory.getSize()) {
-                        GuiItem element = getItem(items.getKey());
-                        if (!(element instanceof GuiStorageItem)
-                                || !((GuiStorageItem) element).setStorageItem(event.getWhoClicked(), items.getKey(), items.getValue())) {
+                        GuiItem item = getItem(items.getKey());
+                        if (!(item instanceof GuiStorageItem)
+                                || !((GuiStorageItem) item).setStorageItem(event.getWhoClicked(), items.getKey(), items.getValue())) {
                             ItemStack slotItem = event.getInventory().getItem(items.getKey());
                             if (!items.getValue().isSimilar(slotItem)) {
                                 rest += items.getValue().getAmount();
@@ -1331,9 +1331,9 @@ public class TopazUI implements Listener {
                     inventories.remove(event.getPlayer().getUniqueId());
                     pageAmounts.remove(event.getPlayer().getUniqueId());
                     pageNumbers.remove(event.getPlayer().getUniqueId());
-                    for (GuiItem element : getItems()) {
-                        if (element instanceof DynamicGuiItem) {
-                            ((DynamicGuiItem) element).removeCachedItem(event.getPlayer());
+                    for (GuiItem item : getItems()) {
+                        if (item instanceof DynamicGuiItem) {
+                            ((DynamicGuiItem) item).removeCachedItem(event.getPlayer());
                         }
                     }
                 }
@@ -1585,9 +1585,9 @@ public class TopazUI implements Listener {
                 if (newCursor.isSimilar(viewItem)) {
                     itemInGui = true;
                 }
-                GuiItem element = getItem(i);
-                if (element instanceof GuiStorageItem) {
-                    GuiStorageItem storageItem = (GuiStorageItem) element;
+                GuiItem item = getItem(i);
+                if (item instanceof GuiStorageItem) {
+                    GuiStorageItem storageItem = (GuiStorageItem) item;
                     ItemStack otherStorageItem = storageItem.getStorageItem(click.getWhoClicked(), i);
                     if (addToStack(newCursor, otherStorageItem)) {
                         if (otherStorageItem.getAmount() == 0) {
